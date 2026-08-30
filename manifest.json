@@ -1,6 +1,6 @@
 {
-  "name": "Peso — Registo de Peso",
-  "short_name": "Peso",
+  "name": "Weight Tracker",
+  "short_name": "Weight Tracker",
   "description": "Registo pessoal de peso, offline, sem servidor.",
   "start_url": "./index.html",
   "scope": "./",
