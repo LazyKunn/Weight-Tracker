@@ -329,6 +329,13 @@
       </div>
 
       <div class="card">
+        <h2>Importar dados</h2>
+        <p class="note">Restaura registos a partir de um ficheiro .csv exportado anteriormente (útil depois de limpar os dados do site ou reinstalar a app). Registos duplicados são ignorados automaticamente.</p>
+        <input type="file" id="importFile" accept=".csv,text/csv" style="display:none;">
+        <button class="btn btn-block" id="importBtn" style="margin-top:10px;">Importar CSV</button>
+      </div>
+
+      <div class="card">
         <h2>Exportar dados</h2>
         <p class="note">Gera um ficheiro .csv com todo o histórico, pronto a enviar por WhatsApp, Discord, email, etc.</p>
         <button class="btn btn-block primary" id="exportBtn" style="margin-top:10px;">Exportar / Partilhar CSV</button>
@@ -786,6 +793,62 @@
     entries = []; goal = null; reminder = {enabled:false, day:1, time:"06:00"}; settings = {name:""};
     renderAll();
     toast("Dados apagados");
+  });
+
+  /* ---------------- Import CSV ---------------- */
+  function parseCsvToEntries(text){
+    const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(l=>l.length);
+    if(lines.length && /data.*hora.*peso/i.test(lines[0])) lines.shift(); // remove cabeçalho se existir
+    const imported = [];
+    lines.forEach(line=>{
+      const parts = line.split(",");
+      if(parts.length < 3) return;
+      const [dateStr, timeStr, weightStr] = parts;
+      const dateBits = (dateStr || "").split("/").map(Number);
+      const timeBits = (timeStr || "").split(":").map(Number);
+      if(dateBits.length < 3) return;
+      const [d, m, y] = dateBits;
+      const [hh, mm] = [timeBits[0] || 0, timeBits[1] || 0];
+      const weight = parseFloat(String(weightStr).replace(",", "."));
+      if(!d || !m || !y || isNaN(weight) || weight <= 0 || weight > 500) return;
+      const dt = new Date(y, m - 1, d, hh, mm, 0, 0);
+      if(isNaN(dt.getTime())) return;
+      imported.push({ ts: dt.getTime(), weight: round1(weight) });
+    });
+    return imported;
+  }
+
+  document.getElementById("importBtn").addEventListener("click", ()=>{
+    document.getElementById("importFile").click();
+  });
+  document.getElementById("importFile").addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imported = parseCsvToEntries(String(reader.result));
+      e.target.value = "";
+      if(imported.length === 0){
+        toast("Não encontrei registos válidos nesse ficheiro");
+        return;
+      }
+      const existingKeys = new Set(entries.map(en => en.ts + "_" + en.weight.toFixed(1)));
+      let added = 0;
+      imported.forEach(im => {
+        const key = im.ts + "_" + im.weight.toFixed(1);
+        if(existingKeys.has(key)) return; // já existe, ignora duplicado
+        existingKeys.add(key);
+        entries.push({ id: im.ts + "_" + Math.random().toString(36).slice(2), weight: im.weight, ts: im.ts });
+        added++;
+      });
+      entries.sort((a,b)=>a.ts-b.ts);
+      saveEntries(entries);
+      renderAll();
+      if(added > 0) toast(`${added} registo${added>1?"s":""} importado${added>1?"s":""} ✓`);
+      else toast("Esses registos já estavam todos guardados");
+    };
+    reader.onerror = () => toast("Não consegui ler esse ficheiro");
+    reader.readAsText(file);
   });
 
   /* ---------------- Export CSV ---------------- */
