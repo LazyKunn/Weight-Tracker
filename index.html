@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Weight Tracker">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{
     --bg:#0B0F0E;
@@ -589,7 +589,20 @@
     if(chartInstance){ chartInstance.destroy(); }
 
     if(typeof Chart === "undefined"){
-      return; // offline first load without cache yet: chart lib not available
+      ctx.style.display = "none";
+      let warn = document.getElementById("chartLoadWarning");
+      if(!warn){
+        warn = document.createElement("div");
+        warn.id = "chartLoadWarning";
+        warn.className = "note warn";
+        warn.textContent = "Não consegui carregar a biblioteca do gráfico agora (precisa de internet na primeira vez que abres a app, ou pode estar em baixo). Os teus registos estão guardados na mesma — o gráfico aparece assim que a app conseguir carregar a biblioteca.";
+        ctx.parentNode.insertBefore(warn, ctx);
+      }
+      return;
+    } else {
+      const warn = document.getElementById("chartLoadWarning");
+      if(warn) warn.remove();
+      ctx.style.display = "";
     }
 
     chartInstance = new Chart(ctx, {
