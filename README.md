@@ -1,5 +1,7 @@
 # Weight Tracker ⚖️
 
+<img width="1920" height="1080" alt="Weight Tracker" src="https://github.com/user-attachments/assets/6ae1905f-f82d-4c81-8791-7e7943a13f52" />
+
 A simple, lightweight, and responsive web application designed to help users log, monitor, and track their body weight progress over time. 
 
 Built with a focus on accessibility and performance, this project is configured as a **Progressive Web App (PWA)**, meaning it can be installed directly on mobile devices and desktops for a native-app-like experience.
