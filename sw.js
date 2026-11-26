@@ -8,7 +8,7 @@
 //   The URL includes the version (4.4.4), so the file never changes.
 
 // Note: the name starts with "peso" (Portuguese for "weight") for historical reasons.
-const CACHE_NAME = "peso-app-v6";
+const CACHE_NAME = "peso-app-v7";
 
 // Files from our own app, saved during installation
 const APP_ASSETS = [
@@ -16,6 +16,9 @@ const APP_ASSETS = [
   "./index.html",
   "./style.css",
   "./app.js",
+  "./i18n.js",
+  "./locales/en.js",
+  "./locales/pt.js",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
@@ -116,8 +119,9 @@ function fetchWithTimeout(req, ms) {
 // (only works while the service worker is active; see the note in the app about limitations).
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SHOW_REMINDER") {
-    self.registration.showNotification("Time to weigh in ⚖️", {
-      body: "Weekly check-in: open the app and log today's weight.",
+    // The app sends the texts in the chosen language; English is the fallback
+    self.registration.showNotification(event.data.title || "Time to weigh in ⚖️", {
+      body: event.data.body || "Weekly check-in: open the app and log today's weight.",
       icon: "./icon-192.png",
       badge: "./icon-192.png",
       tag: "peso-reminder"

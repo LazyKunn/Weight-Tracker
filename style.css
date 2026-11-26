@@ -201,3 +201,11 @@
 
   .goal-hero{display:flex; align-items:flex-end; justify-content:space-between; gap:10px;}
   ::selection{background:var(--green-dim); color:var(--green);}
+
+.lang-picker{display:flex; gap:8px;}
+.lang-btn{
+  flex:1; padding:11px 6px; border-radius:10px; text-align:center;
+  background:var(--surface-2); color:var(--text-dim); font-size:14px; font-weight:600;
+  border:1px solid transparent;
+}
+.lang-btn.active{background:var(--green-dim); color:var(--green); border-color:var(--green);}
