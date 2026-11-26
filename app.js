@@ -2,6 +2,8 @@
   "use strict";
 
   /* ---------------- Storage layer ---------------- */
+  // The keys start with "peso" (Portuguese for "weight"). Don't rename them:
+  // existing users would lose their saved data.
   const DB_KEY = "peso_entries_v1";
   const GOAL_KEY = "peso_goal_v1";
   const REMINDER_KEY = "peso_reminder_v1";
@@ -36,10 +38,13 @@
   let settings = loadSettings();
   let currentRange = "all";
 
+  // Language/region used to format dates and times (en-GB = day/month/year, 24h clock)
+  const LOCALE = "en-GB";
+
   /* ---------------- Helpers ---------------- */
   function fmtDate(ts){
     const d = new Date(ts);
-    return d.toLocaleDateString("pt-PT", {day:"2-digit", month:"long", year: (d.getFullYear()!==new Date().getFullYear() ? "numeric" : undefined)});
+    return d.toLocaleDateString(LOCALE, {day:"2-digit", month:"long", year: (d.getFullYear()!==new Date().getFullYear() ? "numeric" : undefined)});
   }
   function fmtDateShort(ts){
     const d = new Date(ts);
@@ -47,12 +52,12 @@
     const isToday = d.toDateString() === today.toDateString();
     const y = new Date(today); y.setDate(today.getDate()-1);
     const isYesterday = d.toDateString() === y.toDateString();
-    if(isToday) return "Hoje";
-    if(isYesterday) return "Ontem";
-    return d.toLocaleDateString("pt-PT", {day:"2-digit", month:"long"});
+    if(isToday) return "Today";
+    if(isYesterday) return "Yesterday";
+    return d.toLocaleDateString(LOCALE, {day:"2-digit", month:"long"});
   }
   function fmtTime(ts){
-    return new Date(ts).toLocaleTimeString("pt-PT", {hour:"2-digit", minute:"2-digit"});
+    return new Date(ts).toLocaleTimeString(LOCALE, {hour:"2-digit", minute:"2-digit"});
   }
   function toast(msg){
     const t = document.getElementById("toast");
@@ -73,7 +78,7 @@
 
     if(!last){
       currentWeightEl.textContent = "—";
-      lastUpdateEl.textContent = "Ainda sem registos";
+      lastUpdateEl.textContent = "No entries yet";
       deltaEl.textContent = "—";
       deltaEl.className = "badge flat";
     } else {
@@ -92,7 +97,7 @@
           deltaEl.className = "badge down";
         }
       } else {
-        deltaEl.textContent = "1º registo";
+        deltaEl.textContent = "First entry";
         deltaEl.className = "badge flat";
       }
     }
@@ -105,7 +110,7 @@
     const el = document.getElementById("recentList");
     const last5 = entries.slice(-5).reverse();
     if(last5.length === 0){
-      el.innerHTML = `<div class="empty">Regista o teu primeiro peso acima 👆</div>`;
+      el.innerHTML = `<div class="empty">Log your first weight above 👆</div>`;
       return;
     }
     el.innerHTML = last5.map(e => `
@@ -123,7 +128,7 @@
   function renderHistory(){
     const el = document.getElementById("fullList");
     if(entries.length === 0){
-      el.innerHTML = `<div class="empty">Sem registos ainda.</div>`;
+      el.innerHTML = `<div class="empty">No entries yet.</div>`;
       return;
     }
     const rev = entries.slice().reverse();
@@ -148,7 +153,7 @@
               <div class="w">${e.weight.toFixed(1)} kg</div>
               ${diffHtml}
             </div>
-            <button class="del-btn" data-id="${e.id}" aria-label="Apagar">✕</button>
+            <button class="del-btn" data-id="${e.id}" aria-label="Delete">✕</button>
           </div>
         </div>
       `;
@@ -160,7 +165,7 @@
         entries = entries.filter(e=>String(e.id) !== id);
         saveEntries(entries);
         renderAll();
-        toast("Registo apagado");
+        toast("Entry deleted");
       });
     });
   }
@@ -178,11 +183,11 @@
   function renderChart(){
     const ctx = document.getElementById("chart");
     const filtered = filterByRange(entries, currentRange);
-    const labels = filtered.map(e => new Date(e.ts).toLocaleDateString("pt-PT", {day:"2-digit", month:"2-digit"}));
+    const labels = filtered.map(e => new Date(e.ts).toLocaleDateString(LOCALE, {day:"2-digit", month:"2-digit"}));
     const data = filtered.map(e => e.weight);
 
     const datasets = [{
-      label: "Peso",
+      label: "Weight",
       data,
       borderColor: "#34D399",
       backgroundColor: "rgba(52,211,153,0.12)",
@@ -195,7 +200,7 @@
 
     if(goal && goal.target && filtered.length){
       datasets.push({
-        label: "Objetivo",
+        label: "Goal",
         data: filtered.map(()=>goal.target),
         borderColor: "#8B9490",
         borderDash: [6,5],
@@ -214,7 +219,7 @@
         warn = document.createElement("div");
         warn.id = "chartLoadWarning";
         warn.className = "note warn";
-        warn.textContent = "Não consegui carregar a biblioteca do gráfico agora (precisa de internet na primeira vez que abres a app, ou pode estar em baixo). Os teus registos estão guardados na mesma — o gráfico aparece assim que a app conseguir carregar a biblioteca.";
+        warn.textContent = "Couldn't load the chart library right now (it needs internet the first time you open the app, or it may be down). Your entries are still saved, and the chart will appear as soon as the app can load the library.";
         ctx.parentNode.insertBefore(warn, ctx);
       }
       return;
@@ -263,7 +268,7 @@
     const input = document.getElementById("weightInput");
     const val = parseFloat((input.value || "").replace(",", "."));
     if(isNaN(val) || val <= 0 || val > 500){
-      toast("Introduz um peso válido");
+      toast("Enter a valid weight");
       return;
     }
     entries.push({ id: Date.now(), weight: round1(val), ts: Date.now() });
@@ -271,7 +276,7 @@
     saveEntries(entries);
     input.value = "";
     renderAll();
-    toast("Peso registado ✓");
+    toast("Weight logged ✓");
   });
   document.getElementById("weightInput").addEventListener("keydown", (e)=>{
     if(e.key === "Enter") document.getElementById("registerBtn").click();
@@ -283,7 +288,7 @@
     const remainingEl = document.getElementById("goalRemaining");
     if(!goal || !goal.target){
       targetEl.textContent = "—";
-      remainingEl.textContent = "Define um objetivo";
+      remainingEl.textContent = "Set a goal";
       remainingEl.className = "badge flat";
       return;
     }
@@ -292,14 +297,14 @@
     if(last){
       const diff = round1(last.weight - goal.target);
       if(diff <= 0){
-        remainingEl.textContent = "Objetivo atingido 🎉";
+        remainingEl.textContent = "Goal reached 🎉";
         remainingEl.className = "badge down";
       } else {
-        remainingEl.textContent = `Faltam -${diff.toFixed(1)} kg`;
+        remainingEl.textContent = `${diff.toFixed(1)} kg to go`;
         remainingEl.className = "badge flat";
       }
     } else {
-      remainingEl.textContent = "Sem registos ainda";
+      remainingEl.textContent = "No entries yet";
       remainingEl.className = "badge flat";
     }
   }
@@ -307,7 +312,7 @@
     const input = document.getElementById("goalInput");
     const val = parseFloat((input.value || "").replace(",", "."));
     if(isNaN(val) || val <= 0 || val > 500){
-      toast("Introduz um objetivo válido");
+      toast("Enter a valid goal");
       return;
     }
     goal = { target: round1(val) };
@@ -315,7 +320,7 @@
     input.value = "";
     renderGoal();
     renderChart();
-    toast("Objetivo guardado ✓");
+    toast("Goal saved ✓");
   });
 
   /* ---------------- Reminder ---------------- */
@@ -331,18 +336,18 @@
     const statusEl = document.getElementById("notifStatus");
     const btn = document.getElementById("notifPermBtn");
     if(!("Notification" in window)){
-      statusEl.textContent = "O teu browser não suporta notificações — vais ver um aviso dentro da app à hora marcada, se a app estiver aberta.";
+      statusEl.textContent = "Your browser doesn't support notifications. You'll see an in-app message at the chosen time if the app is open.";
       btn.style.display = "none";
       return;
     }
     if(Notification.permission === "granted"){
-      statusEl.textContent = "Notificações ativas ✓";
+      statusEl.textContent = "Notifications enabled ✓";
       btn.style.display = "none";
     } else if(Notification.permission === "denied"){
-      statusEl.textContent = "Notificações bloqueadas nas definições do telemóvel. Vais ver um aviso dentro da app em alternativa.";
+      statusEl.textContent = "Notifications are blocked in your phone settings. You'll see an in-app message instead.";
       btn.style.display = "none";
     } else {
-      statusEl.textContent = "Notificações ainda não ativadas.";
+      statusEl.textContent = "Notifications not enabled yet.";
       btn.style.display = "block";
     }
   }
@@ -350,7 +355,7 @@
     if(!("Notification" in window)) return;
     const perm = await Notification.requestPermission();
     updateNotifStatus();
-    if(perm === "granted") toast("Notificações ativadas ✓");
+    if(perm === "granted") toast("Notifications enabled ✓");
   });
   document.getElementById("reminderToggle").addEventListener("change", (e)=>{
     reminder.enabled = e.target.checked;
@@ -375,7 +380,7 @@
     const [h,m] = (reminder.time || "06:00").split(":").map(Number);
     const target = new Date(now); target.setHours(h, m, 0, 0);
     const diffMs = now - target;
-    // dispara se estamos dentro da janela [0, 30min] depois da hora marcada, uma vez por dia
+    // fire if we are within [0, 30 min] after the chosen time, once per day
     if(diffMs >= 0 && diffMs <= 30*60*1000){
       const todayKey = now.toDateString();
       const lastFired = localStorage.getItem(LAST_REMINDER_KEY);
@@ -388,9 +393,9 @@
     if("Notification" in window && Notification.permission === "granted" && navigator.serviceWorker && navigator.serviceWorker.controller){
       navigator.serviceWorker.controller.postMessage({type:"SHOW_REMINDER"});
     } else if("Notification" in window && Notification.permission === "granted"){
-      new Notification("Hora de te pesares ⚖️", { body:"Abre a app e regista o teu peso de hoje.", icon:"icon-192.png" });
+      new Notification("Time to weigh in ⚖️", { body:"Open the app and log today's weight.", icon:"icon-192.png" });
     } else {
-      toast("Lembrete: hoje é dia de te pesares ⚖️");
+      toast("Reminder: today is weigh-in day ⚖️");
     }
   }
   setInterval(checkReminder, 60*1000);
@@ -404,19 +409,19 @@
     settings.name = document.getElementById("nameInput").value.trim();
     saveSettings(settings);
     updateGreeting();
-    toast("Nome guardado ✓");
+    toast("Name saved ✓");
   });
   function updateGreeting(){
     const h1 = document.getElementById("topTitle");
     const eyebrow = document.getElementById("topEyebrow");
     if(currentView === "dashboard"){
-      eyebrow.textContent = settings.name ? `Olá, ${settings.name}` : "Bem-vindo";
-      h1.textContent = "O teu progresso";
+      eyebrow.textContent = settings.name ? `Hi, ${settings.name}` : "Welcome";
+      h1.textContent = "Your progress";
     }
   }
 
   document.getElementById("clearBtn").addEventListener("click", ()=>{
-    if(!confirm("Apagar TODOS os dados (registos, objetivo, definições)? Esta ação não pode ser desfeita.")) return;
+    if(!confirm("Delete ALL data (entries, goal, settings)? This can't be undone.")) return;
     localStorage.removeItem(DB_KEY);
     localStorage.removeItem(GOAL_KEY);
     localStorage.removeItem(REMINDER_KEY);
@@ -424,13 +429,14 @@
     localStorage.removeItem(LAST_REMINDER_KEY);
     entries = []; goal = null; reminder = {enabled:false, day:1, time:"06:00"}; settings = {name:""};
     renderAll();
-    toast("Dados apagados");
+    toast("Data deleted");
   });
 
   /* ---------------- Import CSV ---------------- */
   function parseCsvToEntries(text){
     const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(l=>l.length);
-    if(lines.length && /data.*hora.*peso/i.test(lines[0])) lines.shift(); // remove cabeçalho se existir
+    // remove the header row if present (accepts the new English header and the old Portuguese one)
+    if(lines.length && /(date|data).*(time|hora).*(weight|peso)/i.test(lines[0])) lines.shift();
     const imported = [];
     lines.forEach(line=>{
       const parts = line.split(",");
@@ -461,14 +467,14 @@
       const imported = parseCsvToEntries(String(reader.result));
       e.target.value = "";
       if(imported.length === 0){
-        toast("Não encontrei registos válidos nesse ficheiro");
+        toast("No valid entries found in that file");
         return;
       }
       const existingKeys = new Set(entries.map(en => en.ts + "_" + en.weight.toFixed(1)));
       let added = 0;
       imported.forEach(im => {
         const key = im.ts + "_" + im.weight.toFixed(1);
-        if(existingKeys.has(key)) return; // já existe, ignora duplicado
+        if(existingKeys.has(key)) return; // already exists, skip duplicate
         existingKeys.add(key);
         entries.push({ id: im.ts + "_" + Math.random().toString(36).slice(2), weight: im.weight, ts: im.ts });
         added++;
@@ -476,38 +482,39 @@
       entries.sort((a,b)=>a.ts-b.ts);
       saveEntries(entries);
       renderAll();
-      if(added > 0) toast(`${added} registo${added>1?"s":""} importado${added>1?"s":""} ✓`);
-      else toast("Esses registos já estavam todos guardados");
+      if(added > 0) toast(`${added} entr${added>1?"ies":"y"} imported ✓`);
+      else toast("All those entries were already saved");
     };
-    reader.onerror = () => toast("Não consegui ler esse ficheiro");
+    reader.onerror = () => toast("Couldn't read that file");
     reader.readAsText(file);
   });
 
   /* ---------------- Export CSV ---------------- */
   document.getElementById("exportBtn").addEventListener("click", async ()=>{
-    if(entries.length === 0){ toast("Ainda não há registos para exportar"); return; }
-    let csv = "Data,Hora,Peso (kg)\n";
+    if(entries.length === 0){ toast("No entries to export yet"); return; }
+    // Date format is day/month/year, the same format the importer expects
+    let csv = "Date,Time,Weight (kg)\n";
     entries.forEach(e=>{
       const d = new Date(e.ts);
-      const dateStr = d.toLocaleDateString("pt-PT");
-      const timeStr = d.toLocaleTimeString("pt-PT", {hour:"2-digit", minute:"2-digit"});
+      const dateStr = d.toLocaleDateString(LOCALE);
+      const timeStr = d.toLocaleTimeString(LOCALE, {hour:"2-digit", minute:"2-digit"});
       csv += `${dateStr},${timeStr},${e.weight.toFixed(1)}\n`;
     });
     const blob = new Blob([csv], { type: "text/csv" });
-    const file = new File([blob], "historico-peso.csv", { type: "text/csv" });
+    const file = new File([blob], "weight-history.csv", { type: "text/csv" });
 
     if(navigator.canShare && navigator.canShare({ files: [file] })){
       try{
-        await navigator.share({ files: [file], title: "Histórico de peso", text: "O meu histórico de peso" });
+        await navigator.share({ files: [file], title: "Weight history", text: "My weight history" });
         return;
-      }catch(err){ /* utilizador cancelou ou falhou -> cai no download */ }
+      }catch(err){ /* user cancelled or it failed -> fall back to download */ }
     }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = "historico-peso.csv";
+    a.href = url; a.download = "weight-history.csv";
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast("CSV descarregado ✓");
+    toast("CSV downloaded ✓");
   });
 
   /* ---------------- Install prompt ---------------- */
@@ -516,7 +523,7 @@
     e.preventDefault();
     deferredPrompt = e;
     document.getElementById("installBtn").style.display = "block";
-    document.getElementById("installNote").textContent = "Instala a app para a teres sempre à mão, como qualquer outra app.";
+    document.getElementById("installNote").textContent = "Install the app to always have it at hand, like any other app.";
   });
   document.getElementById("installBtn").addEventListener("click", async ()=>{
     if(!deferredPrompt) return;
@@ -529,10 +536,10 @@
   /* ---------------- Tab navigation ---------------- */
   let currentView = "dashboard";
   const titles = {
-    dashboard: { eyebrow: "Hoje", title: "O teu progresso" },
-    history: { eyebrow: "Registo completo", title: "Histórico de peso" },
-    goals: { eyebrow: "Plano e hábitos", title: "Os teus objetivos" },
-    settings: { eyebrow: "A tua app", title: "Definições" }
+    dashboard: { eyebrow: "Today", title: "Your progress" },
+    history: { eyebrow: "Full log", title: "Weight history" },
+    goals: { eyebrow: "Plan and habits", title: "Your goals" },
+    settings: { eyebrow: "Your app", title: "Settings" }
   };
   function setView(view){
     currentView = view;
@@ -554,7 +561,7 @@
   /* ---------------- App version ---------------- */
   // version.json is created automatically by GitHub Actions on every deploy
   // (see .github/workflows/deploy.yml). When running locally it doesn't exist,
-  // so the default text ("versão local") stays.
+  // so the default text ("local version") stays.
   const REPO_URL = "https://github.com/LazyKunn/Weight-Tracker";
 
   async function loadVersion(){
@@ -574,9 +581,9 @@
       link.style.color = "var(--green)";
 
       const date = new Date(info.date);
-      const dateText = isNaN(date) ? "" : " · " + date.toLocaleDateString("pt-PT", {day:"numeric", month:"short", year:"numeric"});
+      const dateText = isNaN(date) ? "" : " · " + date.toLocaleDateString(LOCALE, {day:"numeric", month:"short", year:"numeric"});
 
-      el.textContent = "versão ";
+      el.textContent = "version ";
       el.appendChild(link);
       el.appendChild(document.createTextNode(dateText));
     }catch(e){ /* offline or no version.json: keep the default text */ }
@@ -591,7 +598,7 @@
     renderSettings();
   }
 
-  if(goal) document.getElementById("goalInput").placeholder = `Objetivo atual: ${goal.target.toFixed(1)} kg`;
+  if(goal) document.getElementById("goalInput").placeholder = `Current goal: ${goal.target.toFixed(1)} kg`;
 
   renderAll();
   checkReminder();

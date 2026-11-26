@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
@@ -18,8 +18,8 @@
 <div id="app">
 
   <header class="topbar">
-    <p class="eyebrow" id="topEyebrow">Hoje</p>
-    <h1 id="topTitle">O teu progresso</h1>
+    <p class="eyebrow" id="topEyebrow">Today</p>
+    <h1 id="topTitle">Your progress</h1>
   </header>
 
   <main>
@@ -29,47 +29,47 @@
         <div class="row" style="align-items:flex-start;">
           <div>
             <div class="weight-value"><span id="dashCurrentWeight">—</span><span class="weight-unit">kg</span></div>
-            <div class="weight-meta" id="dashLastUpdate">Ainda sem registos</div>
+            <div class="weight-meta" id="dashLastUpdate">No entries yet</div>
           </div>
           <span class="badge flat" id="dashDelta">—</span>
         </div>
         <div class="input-row">
-          <input type="text" id="weightInput" inputmode="decimal" placeholder="Peso de hoje (kg)">
-          <button class="btn primary" id="registerBtn">Registar</button>
+          <input type="text" id="weightInput" inputmode="decimal" placeholder="Today's weight (kg)">
+          <button class="btn primary" id="registerBtn">Log</button>
         </div>
       </div>
 
       <div class="card">
-        <h2>Evolução</h2>
+        <h2>Progress</h2>
         <div class="filters">
-          <button class="chip active" data-range="all">Tudo</button>
-          <button class="chip" data-range="1m">Último mês</button>
-          <button class="chip" data-range="3m">3 meses</button>
+          <button class="chip active" data-range="all">All</button>
+          <button class="chip" data-range="1m">Last month</button>
+          <button class="chip" data-range="3m">3 months</button>
         </div>
         <canvas id="chart" height="180"></canvas>
       </div>
 
       <div class="card">
         <div class="row" style="margin-bottom:6px;">
-          <h2 style="margin:0;">Registos recentes</h2>
-          <button class="link" id="goHistoryLink">Ver histórico</button>
+          <h2 style="margin:0;">Recent entries</h2>
+          <button class="link" id="goHistoryLink">See history</button>
         </div>
         <div id="recentList"></div>
       </div>
     </section>
 
-    <!-- HISTÓRICO -->
+    <!-- HISTORY -->
     <section class="view" id="view-history">
       <div class="card">
-        <h2>Todos os registos</h2>
+        <h2>All entries</h2>
         <div id="fullList"></div>
       </div>
     </section>
 
-    <!-- OBJETIVOS -->
+    <!-- GOALS -->
     <section class="view" id="view-goals">
       <div class="card">
-        <h2>Peso objetivo</h2>
+        <h2>Target weight</h2>
         <div class="goal-hero">
           <div>
             <div class="weight-value" style="font-size:36px;"><span id="goalCurrentTarget">—</span><span class="weight-unit">kg</span></div>
@@ -77,80 +77,80 @@
           <span class="badge flat" id="goalRemaining">—</span>
         </div>
         <div class="input-row">
-          <input type="text" id="goalInput" inputmode="decimal" placeholder="Definir novo objetivo (kg)">
-          <button class="btn primary" id="goalSaveBtn">Guardar</button>
+          <input type="text" id="goalInput" inputmode="decimal" placeholder="Set a new goal (kg)">
+          <button class="btn primary" id="goalSaveBtn">Save</button>
         </div>
       </div>
 
       <div class="card">
         <div class="row">
-          <h2 style="margin:0;">Lembrete semanal</h2>
+          <h2 style="margin:0;">Weekly reminder</h2>
           <label class="switch">
             <input type="checkbox" id="reminderToggle">
             <span class="slider"></span>
           </label>
         </div>
-        <p class="note" style="margin-top:12px;">Dia da semana</p>
+        <p class="note" style="margin-top:12px;">Day of the week</p>
         <div class="day-picker" id="dayPicker">
-          <button class="day-btn" data-day="1">Seg</button>
-          <button class="day-btn" data-day="2">Ter</button>
-          <button class="day-btn" data-day="3">Qua</button>
-          <button class="day-btn" data-day="4">Qui</button>
-          <button class="day-btn" data-day="5">Sex</button>
-          <button class="day-btn" data-day="6">Sáb</button>
-          <button class="day-btn" data-day="0">Dom</button>
+          <button class="day-btn" data-day="1">Mon</button>
+          <button class="day-btn" data-day="2">Tue</button>
+          <button class="day-btn" data-day="3">Wed</button>
+          <button class="day-btn" data-day="4">Thu</button>
+          <button class="day-btn" data-day="5">Fri</button>
+          <button class="day-btn" data-day="6">Sat</button>
+          <button class="day-btn" data-day="0">Sun</button>
         </div>
         <div class="row" style="margin-top:10px;">
-          <p class="note" style="margin:0;">Hora</p>
+          <p class="note" style="margin:0;">Time</p>
           <input type="time" id="reminderTime" value="06:00" style="max-width:130px;">
         </div>
         <p class="note" id="notifStatus" style="margin-top:14px;"></p>
-        <button class="btn btn-block" id="notifPermBtn" style="margin-top:6px;">Ativar notificações</button>
+        <button class="btn btn-block" id="notifPermBtn" style="margin-top:6px;">Enable notifications</button>
         <p class="note warn" style="margin-top:12px;">
-          Nota: como esta app não usa nenhum servidor, o lembrete só dispara com fiabilidade
-          se a app estiver aberta (ou em segundo plano recente) no dia/hora escolhido.
-          Se o telemóvel tiver a app completamente fechada há muito tempo, o Android pode não acordar o lembrete.
+          Note: since this app doesn't use a server, the reminder only fires reliably
+          if the app is open (or was recently in the background) on the chosen day and time.
+          If the app has been fully closed for a long time, Android may not wake up the reminder.
         </p>
       </div>
     </section>
 
-    <!-- DEFINIÇÕES -->
+    <!-- SETTINGS -->
     <section class="view" id="view-settings">
       <div class="card">
-        <h2>O teu nome</h2>
+        <h2>Your name</h2>
         <div class="input-row">
-          <input type="text" id="nameInput" placeholder="Como te devemos chamar?">
-          <button class="btn" id="nameSaveBtn">Guardar</button>
+          <input type="text" id="nameInput" placeholder="What should we call you?">
+          <button class="btn" id="nameSaveBtn">Save</button>
         </div>
       </div>
 
       <div class="card">
-        <h2>Importar dados</h2>
-        <p class="note">Restaura registos a partir de um ficheiro .csv exportado anteriormente (útil depois de limpar os dados do site ou reinstalar a app). Registos duplicados são ignorados automaticamente.</p>
+        <h2>Import data</h2>
+        <p class="note">Restore entries from a previously exported .csv file (useful after clearing the site data or reinstalling the app). Duplicate entries are skipped automatically.</p>
         <input type="file" id="importFile" accept=".csv,text/csv" style="display:none;">
-        <button class="btn btn-block" id="importBtn" style="margin-top:10px;">Importar CSV</button>
+        <button class="btn btn-block" id="importBtn" style="margin-top:10px;">Import CSV</button>
       </div>
 
       <div class="card">
-        <h2>Exportar dados</h2>
-        <p class="note">Gera um ficheiro .csv com todo o histórico, pronto a enviar por WhatsApp, Discord, email, etc.</p>
-        <button class="btn btn-block primary" id="exportBtn" style="margin-top:10px;">Exportar / Partilhar CSV</button>
+        <h2>Export data</h2>
+        <p class="note">Creates a .csv file with your full history, ready to send via WhatsApp, Discord, email, etc.</p>
+        <button class="btn btn-block primary" id="exportBtn" style="margin-top:10px;">Export / Share CSV</button>
       </div>
 
       <div class="card">
-        <h2>Instalar app</h2>
-        <p class="note" id="installNote">Usa o menu do browser → "Adicionar ao ecrã principal" para instalar esta app no telemóvel.</p>
-        <button class="btn btn-block" id="installBtn" style="margin-top:10px; display:none;">Instalar no telemóvel</button>
+        <h2>Install app</h2>
+        <p class="note" id="installNote">Use the browser menu → "Add to Home screen" to install this app on your phone.</p>
+        <button class="btn btn-block" id="installBtn" style="margin-top:10px; display:none;">Install on phone</button>
       </div>
 
       <div class="card">
-        <h2>Dados</h2>
-        <button class="btn btn-block danger" id="clearBtn">Apagar todos os dados</button>
+        <h2>Data</h2>
+        <button class="btn btn-block danger" id="clearBtn">Delete all data</button>
       </div>
 
       <p class="note" style="text-align:center; margin-top:6px;">
-        Weight Tracker · <span id="appVersion">versão local</span><br>
-        tudo guardado só neste telemóvel
+        Weight Tracker · <span id="appVersion">local version</span><br>
+        all data stays on this device
       </p>
     </section>
   </main>
@@ -162,15 +162,15 @@
     </button>
     <button class="tab-btn" data-view="history">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M7 15l3-3 3 3 5-6"/></svg>
-      Histórico
+      History
     </button>
     <button class="tab-btn" data-view="goals">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.7" fill="currentColor"/></svg>
-      Objetivos
+      Goals
     </button>
     <button class="tab-btn" data-view="settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.2.4.51.74.9 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      Definições
+      Settings
     </button>
   </nav>
 
