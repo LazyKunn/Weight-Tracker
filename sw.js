@@ -1,8 +1,9 @@
-// Service worker: cacheia tudo o que a app precisa para funcionar 100% offline.
-const CACHE_NAME = "peso-app-v4";
+const CACHE_NAME = "peso-app-v5";
 const ASSETS = [
   "./",
   "./index.html",
+  "./style.css",
+  "./app.js",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
