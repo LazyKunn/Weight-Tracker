@@ -1,1 +1,51 @@
+# Publishes the app to GitHub Pages on every push to "main",
+# and creates a version.json file with the commit info so the app
+# can show which version it is running (Settings screen).
 
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # lets you run it manually from the "Actions" tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If you push twice quickly, only the latest one gets published
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v7
+
+      - name: Create version.json
+        run: |
+          jq -n \
+            --arg commit "$(git rev-parse HEAD)" \
+            --arg short  "$(git rev-parse --short HEAD)" \
+            --arg date   "$(git log -1 --format=%cI)" \
+            '{commit: $commit, short: $short, date: $date}' > version.json
+          cat version.json
+
+      - name: Set up GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload the site files
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: .
+
+      - name: Publish
+        id: deployment
+        uses: actions/deploy-pages@v5
