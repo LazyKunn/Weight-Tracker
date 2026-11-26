@@ -551,6 +551,37 @@
   });
   document.getElementById("goHistoryLink").addEventListener("click", ()=> setView("history"));
 
+  /* ---------------- App version ---------------- */
+  // version.json is created automatically by GitHub Actions on every deploy
+  // (see .github/workflows/deploy.yml). When running locally it doesn't exist,
+  // so the default text ("versão local") stays.
+  const REPO_URL = "https://github.com/LazyKunn/Weight-Tracker";
+
+  async function loadVersion(){
+    const el = document.getElementById("appVersion");
+    try{
+      const res = await fetch("version.json", { cache: "no-store" });
+      if(!res.ok) return;
+      const info = await res.json();
+      // only accept a real commit hash (letters a-f and numbers)
+      if(!/^[0-9a-f]{7,40}$/.test(info.commit || "")) return;
+
+      const link = document.createElement("a");
+      link.href = `${REPO_URL}/commit/${info.commit}`;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = info.short || info.commit.slice(0, 7);
+      link.style.color = "var(--green)";
+
+      const date = new Date(info.date);
+      const dateText = isNaN(date) ? "" : " · " + date.toLocaleDateString("pt-PT", {day:"numeric", month:"short", year:"numeric"});
+
+      el.textContent = "versão ";
+      el.appendChild(link);
+      el.appendChild(document.createTextNode(dateText));
+    }catch(e){ /* offline or no version.json: keep the default text */ }
+  }
+
   /* ---------------- Init ---------------- */
   function renderAll(){
     renderDashboard();
@@ -564,6 +595,7 @@
 
   renderAll();
   checkReminder();
+  loadVersion();
 
   if("serviceWorker" in navigator){
     window.addEventListener("load", ()=>{
